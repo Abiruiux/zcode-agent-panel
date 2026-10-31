@@ -1,7 +1,7 @@
 # ZCode Agent Panel
 
-An **agent panel pinned above the ZCode chat box**: one Main agent row with the tokens burned, the
-context left as a percentage, time and cost, plus one row per subagent while they work. Built after
+An **agent panel pinned above the ZCode chat box**: one Main agent row with the tokens used so far
+and the context left, time and cost, plus one row per subagent while they work. Built after
 the [antigravity-agent-panel](https://github.com/mdnaeem-28/antigravity-agent-panel) design; all data
 comes from ZCode's own local files. Zero npm dependencies, pure Node.js.
 
@@ -44,17 +44,18 @@ telemetry, on a stand-in chat page.
 
 ## What the panel shows
 
-**Header - the whole chat.** Title `Agents`, then total tokens for main agent plus all subagents, the
-wall time of the chat, and the subagent count. On the right: **Context**, the live usage bar with
-`% used · % free`, and a **Hide** button. Hover any of them for exact numbers.
+**Header - the whole chat.** Title `Agents`, then the tokens used by the main agent plus all
+subagents, the wall time of the chat, and the subagent count. On the right: **Context**, the live
+usage bar with `% used` and the tokens left, and a **Hide** button. Hover any of them for exact
+numbers.
 
 **Main agent row - always visible.** The model name, its reasoning effort badge (`max`, `enabled`,
-`light`), the running tool when one is in flight, total tokens this session, active time, estimated
+`light`), the running tool when one is in flight, tokens used this session, active time, estimated
 cost, and a dot that pulses green while work is happening.
 
 **Subagent rows - while they work.** One row per subagent: colored dot, profile type
-(`general-purpose`, `Explore`, custom agents), the task description you gave it, model, tokens, tool
-count, and live status. When subagents finish they collapse into a footer line: `2 done · 1.5M tokens`
+(`general-purpose`, `Explore`, custom agents), the task description you gave it, model, tokens used, tool
+count, and live status. When subagents finish they collapse into a footer line: `2 done · 1.5M used`
 with a **Show** button to list them.
 
 **Behaviour.** The panel opens when a turn starts, collapses when things go quiet, and hides itself
@@ -121,8 +122,8 @@ remove everything.
 ```
 
 **`contextLimits` - read this if the percentage looks wrong.** ZCode does not keep model context
-window sizes on disk, so the panel computes `% used / % free` against these numbers. The shipped
-values are evidence-based: each model's entry is the largest prompt that model has carried
+window sizes on disk, so the panel computes the used percentage and the tokens left from these
+numbers. The shipped values are evidence-based: each model's entry is the largest prompt that model has carried
 successfully on this machine, rounded up, because a request that succeeded proves the window is at
 least that big. If you know the real window from your provider, put it here. If an observed request
 ever exceeds the value you set, the panel shows `full` instead of a percentage and the tooltip tells

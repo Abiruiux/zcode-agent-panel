@@ -15,7 +15,7 @@
   'use strict';
 
   // Bump VERSION whenever the widget's markup, CSS or icons change.
-  var VERSION = 5;
+  var VERSION = 6;
 
   if (window.__zcodeAgentPanelInstalled && window.__zcodeAgentPanelVersion === VERSION) {
     try { window.__zcodeAgentPanelEnsure && window.__zcodeAgentPanelEnsure(); } catch (e) {}
@@ -619,7 +619,7 @@
       + (s.description ? '<span class="desc">' + esc(s.description) + '</span>' : '<span class="desc"></span>')
       + '<span class="spacer"></span>'
       + (s.model ? '<span class="metric n2">' + esc(s.model) + '</span>' : '')
-      + '<span class="metric fg">' + fmtTokens(s.tokens.total) + ' tokens</span>'
+      + '<span class="metric fg">' + fmtTokens(s.tokens.total) + ' used</span>'
       + (s.toolCalls ? '<span class="metric n3">' + s.toolCalls + ' tools</span>' : '')
       + (cost ? '<span class="metric n3">' + cost + '</span>' : '')
       + '<span class="metric ' + (s.running ? 'fg srunning' : '') + '">' + esc(statusText) + '</span>'
@@ -678,13 +678,13 @@
     var t = d.totals || { tokens: m.tokens, subagents: 0, runningSubagents: 0, doneSubagents: 0 };
 
     // Header: chat totals.
-    var hTotals = fmtTokens(t.tokens.total) + ' tokens';
+    var hTotals = fmtTokens(t.tokens.total) + ' tokens used';
     var hDur = m.durationMs != null ? fmtDur(m.durationMs) : null;
     if (hDur && hDur !== '-') hTotals += ' · ' + hDur;
     if (t.cost != null) hTotals += ' · ' + fmtCost(t.cost);
     if (t.subagents) hTotals += ' · ' + t.subagents + ' subagent' + (t.subagents > 1 ? 's' : '');
     refs.htotals.textContent = hTotals;
-    refs.htotals.title = 'whole chat, main agent + subagents: '
+    refs.htotals.title = 'tokens used by the whole chat, main agent + subagents: '
       + (t.tokens.input || 0).toLocaleString() + ' input (' + (t.tokens.cacheRead || 0).toLocaleString() + ' cached) + '
       + (t.tokens.output || 0).toLocaleString() + ' output'
       + (t.tokens.reasoning ? ' (' + t.tokens.reasoning.toLocaleString() + ' reasoning)' : '');
@@ -696,15 +696,17 @@
       fill.style.width = (m.context.overLimit ? 100 : m.context.pct) + '%';
       bar.classList.toggle('warn', !m.context.overLimit && m.context.pct >= 65 && m.context.pct < 85);
       bar.classList.toggle('hot', m.context.overLimit || m.context.pct >= 85);
+      var ctxLeft = (m.context.limit != null && m.context.used != null) ? Math.max(0, m.context.limit - m.context.used) : null;
       refs.ctxpct.innerHTML = m.context.overLimit
         ? 'full'
-        : Math.round(m.context.pct) + '%<span class="pctfree"> · ' + Math.round(m.context.availablePct) + '% free</span>';
+        : Math.round(m.context.pct) + '% used<span class="pctfree">' + (ctxLeft != null ? ' · ' + fmtTokens(ctxLeft) + ' left' : ' · ' + Math.round(m.context.availablePct) + '% free') + '</span>';
       refs.usage.title = m.context.overLimit
         ? 'context window: the last request carried ' + (m.context.used || 0).toLocaleString() + ' tokens, more than the '
           + (m.context.limit || 0).toLocaleString() + ' limit set in panel-config.json, so the percentage cannot be trusted. '
           + 'Largest prompt seen this chat: ' + (m.context.observedMax || 0).toLocaleString() + ' tokens. Raise contextLimits for this model to fix it.'
         : 'context window: ' + (m.context.used || 0).toLocaleString() + ' of ' + (m.context.limit || 0).toLocaleString()
-          + ' tokens used (' + m.context.pct + '%), ' + m.context.availablePct + '% still available';
+          + ' tokens used (' + m.context.pct + '%), '
+          + (ctxLeft != null ? fmtTokens(ctxLeft) + ' tokens left (' + m.context.availablePct + '% free)' : m.context.availablePct + '% still available');
       refs.usage.classList.remove('hidden');
     } else refs.usage.classList.add('hidden');
 
@@ -720,7 +722,7 @@
       + 'new input ' + freshIn.toLocaleString() + ' · output ' + (m.tokens.output || 0).toLocaleString()
       + ' · cache reads ' + (m.tokens.cacheRead || 0).toLocaleString()
       + (m.tokens.reasoning ? ' · reasoning ' + m.tokens.reasoning.toLocaleString() : '') + '\n'
-      + 'session total ' + (m.tokens.total || 0).toLocaleString() + ' tokens over ' + m.requests + ' requests, '
+      + 'session total ' + (m.tokens.total || 0).toLocaleString() + ' tokens used over ' + m.requests + ' requests, '
       + m.toolCalls + ' tool calls'
       + (m.turn ? '\ncurrent turn: ' + m.turn.requests + ' requests, ' + m.turn.toolCalls + ' tools' : '')
       + (m.mode ? '  |  mode ' + m.mode : '');
@@ -732,7 +734,7 @@
       + '<span class="spacer"></span>'
       + (d.runningTools && d.runningTools.length
           ? '<span class="metric fg n2">⚙ ' + esc(d.runningTools.filter(function (x, i, a) { return a.indexOf(x) === i; }).slice(0, 2).join(', ')) + '</span>' : '')
-      + '<span class="metric fg">' + fmtTokens(m.tokens.total) + ' tokens</span>'
+      + '<span class="metric fg">' + fmtTokens(m.tokens.total) + ' used</span>'
       + (mainDur != null ? '<span class="metric">' + fmtDur(mainDur) + '</span>' : '')
       + (mCost ? '<span class="metric fg">' + mCost + '</span>' : '')
       + '<span class="dot" title="' + (running ? 'working' : 'idle') + '"></span>'
@@ -750,7 +752,7 @@
     if (dones.length) {
       var doneTokens = (t.doneSubagentTokens && t.doneSubagentTokens.total) || 0;
       var doneCost = fmtCost(t.doneSubagentCost);
-      refs.donetext.textContent = dones.length + ' done · ' + fmtTokens(doneTokens) + ' tokens' + (doneCost ? ' · ' + doneCost : '');
+      refs.donetext.textContent = dones.length + ' done · ' + fmtTokens(doneTokens) + ' used' + (doneCost ? ' · ' + doneCost : '');
       refs.foot.classList.remove('hidden');
       refs.showbtn.textContent = state.showDone ? 'Hide' : 'Show';
       var doneHtml = '';
