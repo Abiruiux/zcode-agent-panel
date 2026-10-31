@@ -1,0 +1,106 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Agent icon lab</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column;
+    font:14px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    background:#15171c; color:#e8eaf0; }
+  .wrap { width:min(860px, 100%); margin:0 auto; padding:22px 18px 0; flex:1; display:flex; flex-direction:column; }
+  header { display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+  header h1 { font-size:14px; font-weight:600; margin:0; }
+  header span { font-size:12px; opacity:.55; }
+  .messages { flex:1; display:flex; flex-direction:column; gap:10px; padding-bottom:10px; overflow:auto; }
+  .msg { border:1px solid rgba(140,152,180,.22); border-radius:10px; padding:9px 12px; font-size:13px; opacity:.85; max-width:76%; }
+  .msg.me { align-self:flex-end; background:rgba(90,140,255,.12); border-color:rgba(90,140,255,.3); }
+  .composerRow { padding:10px 0 22px; }
+  .composer { border:1px solid rgba(140,152,180,.28); border-radius:14px; padding:11px 13px; background:rgba(255,255,255,.03); }
+  [data-lexical-editor] { outline:none; min-height:22px; }
+  .hint { font-size:11px; opacity:.45; margin-top:5px; }
+  .toolbar { padding:0 0 8px; font-size:12px; opacity:.6; }
+  .toolbar button { font:inherit; background:#222734; color:#cdd4e4; border:1px solid rgba(150,160,190,.35); border-radius:8px; padding:3px 10px; cursor:pointer; margin-right:6px; }
+</style></head>
+<body>
+<div class="wrap">
+  <header><h1>Agent icon lab</h1><span>fake telemetry - every profile color, plus one unmapped</span></header>
+  <div class="toolbar">
+    <button id="btn-run">running</button>
+    <button id="btn-idle">idle / all done</button>
+    <button id="btn-light">toggle page light</button>
+  </div>
+  <div class="messages">
+    <div class="msg">The panel above the composer is the real widget, fed by fake data from this page.</div>
+    <div class="msg me">paint the whole crew</div>
+  </div>
+  <div class="composerRow">
+    <div class="composer">
+      <div contenteditable="true" data-lexical-editor="true">Icon test</div>
+      <div class="hint">Ctrl+Shift+Z pins the panel</div>
+    </div>
+  </div>
+</div>
+<script>window.__ZCODE_PANEL_PUSH_ONLY = true; window.__ZCODE_PANEL_BASE = 'http://127.0.0.1:4748';</script>
+<script src="panel.js"></script>
+<script>
+(function () {
+  function tokens(i, o, cr, r) { return { input: i, output: o, cacheRead: cr, reasoning: r, total: i + o }; }
+
+  function sub(type, color, desc, running, elapsed, model) {
+    return {
+      type: type, color: color, description: desc, model: model || 'Flash',
+      modelId: 'deepseek-ai/DeepSeek-V4.1-Flash', requests: 6, toolCalls: 9,
+      tokens: tokens(24000, 3000, 18000, 600),
+      durationMs: elapsed || 45000, running: !!running,
+      status: running ? 'running' : 'completed',
+      startedAt: Date.now() - (elapsed || 45000), cost: null,
+    };
+  }
+
+  var crew = [
+    sub('Explore', 'cyan', 'Sweep the repo for token names', true, 12000),
+    sub('general-purpose', 'blue', 'Measure the coldest dead code', true, 31000),
+    sub('documents:visual-judge', 'purple', 'Judge 12 rendered pages', true, 66000),
+    sub('pdf:visual-judge', 'green', 'Proof the print layout', true, 8000),
+    sub('presentations:visual-judge', 'orange', 'Check the pitch deck', true, 44000),
+    sub('spreadsheets:visual-judge', 'red', 'Audit the budget cells', true, 5200),
+    sub('design-review', 'yellow', 'Critique the booking screen', true, 61000),
+    sub('persona-acid-test', 'pink', 'Run the three lenses', true, 15000),
+    sub('information-architecture', 'teal', 'Map the journey to screens', true, 28000),
+    sub('custom-agent', 'unmapped', 'Unknown color fallback', true, 3000),
+  ];
+
+  function feed(running) {
+    var now = Date.now();
+    window.__ZCODE_PANEL_FEED({
+      ok: true, state: running ? 'running' : 'idle', now: now, lastActivityAt: now - (running ? 0 : 9000),
+      config: { idleCollapseMs: 20000, idleHideMs: 240000 },
+      main: {
+        label: 'Main agent', model: 'DeepSeek V4.1 Flash', modelId: 'deepseek-ai/DeepSeek-V4.1-Flash',
+        tokens: tokens(180000, 24000, 120000, 5000), requests: 22, toolCalls: 41,
+        durationMs: 502000, cost: null, error: null, mode: 'build',
+        effort: { key: 'medium', label: 'medium' },
+        turn: running ? { startedAt: now - 32000, requests: 4, toolCalls: 7 } : null,
+        context: { pct: 38, availablePct: 62, used: 121000, limit: 320000, overLimit: false, observedMax: 121000 },
+      },
+      runningTools: running ? ['Read', 'Grep'] : [],
+      subagents: crew.map(function (s) { return running ? s : Object.assign({}, s, { running: false, status: 'completed' }); }),
+      totals: {
+        tokens: tokens(280000, 44000, 190000, 9700), cost: null,
+        subagents: 10, runningSubagents: running ? 6 : 0, doneSubagents: running ? 4 : 10,
+        doneSubagentTokens: { total: 169000 }, doneSubagentCost: null,
+      },
+    });
+  }
+
+  feed(true);
+  document.getElementById('btn-run').addEventListener('click', function () { feed(true); });
+  document.getElementById('btn-idle').addEventListener('click', function () { feed(false); });
+  document.getElementById('btn-light').addEventListener('click', function () {
+    document.body.style.background = document.body.style.background ? '' : '#f4f5f7';
+    document.body.style.color = document.body.style.color ? '' : '#1d2230';
+  });
+
+  // Keep feeding so the live-looking timers tick, like the daemon does.
+  setInterval(function () { feed(true); }, 1000);
+})();
+</script>
+</body></html>

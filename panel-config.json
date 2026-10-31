@@ -1,0 +1,29 @@
+{
+  "port": 4748,
+  "refreshMs": 1000,
+  "idleCollapseMs": 20000,
+  "idleHideMs": 240000,
+  "maxSubagentRows": 6,
+  "theme": "auto",
+
+  "_contextLimitsNote": "ZCode does not store model context window sizes on disk, so the panel computes the percentage against these numbers. The values are evidence-based: each model's entry is the largest prompt that model has carried successfully in this ZCode install, rounded up, because a request that succeeded proves the window is at least that big. Set the exact window here when you know it; the panel flags the reading as 'full' if an observed request ever exceeds the number you set.",
+  "contextLimits": {
+    "default": 200000,
+    "byModel": {
+      "deepseek-ai/DeepSeek-V4.1-Flash": 320000,
+      "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4": 128000,
+      "GLM-5.3": 200000,
+      "GLM-5.3-Flash": 200000
+    }
+  },
+
+  "_pricingNote": "Rates are USD per 1M tokens. They ship empty so the panel never shows a made-up cost. Fill in your provider's real rates (input, output, optional cacheRead) and the panel shows an estimated spend. Leave a model out and its cost metric is simply hidden.",
+  "pricing": {
+    "byModel": {
+      "deepseek-ai/DeepSeek-V4.1-Flash": null,
+      "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4": null,
+      "GLM-5.3": null,
+      "GLM-5.3-Flash": null
+    }
+  }
+}

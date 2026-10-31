@@ -1,0 +1,18 @@
+# local runtime state (created by the installer and daemon)
+daemon.log
+restart-log.txt
+panel-runtime.json
+install-state.json
+shortcut-backups/
+
+# local development artifacts (kept on this machine, not part of the published repo)
+panel-v0-original.js
+panel-v3-buggy.js
+panel-v4-buggy.js
+icon-test-war.html
+icon-test-retire.html
+
+# OS noise
+.DS_Store
+Thumbs.db
+*.bak

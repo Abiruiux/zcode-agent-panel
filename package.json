@@ -1,0 +1,28 @@
+{
+  "name": "zcode-agent-panel",
+  "version": "1.1.0",
+  "description": "Agent panel pinned above the ZCode chat composer: main agent and subagents with tokens burned, context left and time. Zero dependencies, native DOM integration over the Chrome DevTools Protocol.",
+  "main": "daemon.js",
+  "bin": {
+    "zcode-agent-panel": "./install.js"
+  },
+  "scripts": {
+    "start": "node install.js",
+    "daemon": "node daemon.js",
+    "install-panel": "node install.js",
+    "uninstall-panel": "node uninstall.js"
+  },
+  "keywords": [
+    "zcode",
+    "agent-panel",
+    "token-tracker",
+    "subagents",
+    "telemetry",
+    "hud"
+  ],
+  "author": "Abir hussain niloy",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}
